@@ -46,7 +46,7 @@ def predictions_and_scores(fold, file_cond_test, file_parameters, K, L, T, n_con
     :param n_moa: integer, number of moas in the whole dataset
     :param n_gen: integer, number of genes in the whole dataset
     :param runs: integer, number of runs
-    :return (probas, precision, recall, log_loss_score)
+    :return (probas, log_loss_score)
     '''
     import pandas as pd
     #reading the list with the conditions for the test:
@@ -99,54 +99,6 @@ def predictions_and_scores(fold, file_cond_test, file_parameters, K, L, T, n_con
     df_test = pd.read_csv('/Users/belbordes/Desktop/MoA Project/Code_revision_Toñi/Gemma_1abril/5foldCV_data/F'+
                           str(fold)+'_test_dataframe.csv', index_col=0)
     
-    #scores: precision and recall (we must choose if they will be 0 or 1 depending on the probability)
-    #dataframe with the pairs (cond-moa) with a predicted 1
-    print('Calculating precision and recall...')
-    #we must know how many 1s there were in the training set:
-    ### Cond-MoA with 0s ### 
-    fh=open('/Users/belbordes/Desktop/MoA Project/Code_revision_Toñi/Gemma_1abril/5foldCV_data/F'+
-            str(fold)+'_cmoas0.csv','r')
-    igot=fh.readlines()
-    F1_cmoas0=[]
-    for line in igot:
-        about = line.strip().split(',')
-        F1_cmoas0.append((int(about[0]),int(about[1])))
-    fh.close()
-    ### Cond-MoA with 1s ###
-    fh=open('/Users/belbordes/Desktop/MoA Project/Code_revision_Toñi/Gemma_1abril/5foldCV_data/F'+
-            str(fold)+'_cmoas1.csv','r')
-    igot=fh.readlines()
-    F1_cmoas1=[]
-    for line in igot:
-        about = line.strip().split(',')
-        F1_cmoas1.append((int(about[0]),int(about[1])))
-    fh.close()
-    #percentage of 1s we want:
-    percentage = (len(F1_cmoas1)/(len(F1_cmoas0)+len(F1_cmoas1)))*100 #training set
-    print('There are', len(F1_cmoas1), '1s in the training set (', percentage, '%)')
-    probas_sorted = probas.sort_values(by=['avg_proba1_ctrl0'], ascending=False).reset_index()
-    df_predict_1 = probas_sorted[:int(round((percentage/100)*len(probas), 0))]
-    #dataframe with the pairs with a predicted 0
-    df_predict_0 = probas_sorted[int(round((percentage/100)*len(probas), 0)):]
-    print(int(round((percentage/100)*len(probas), 0)), 'cond-moa pairs of the test set should be 1 (aprox.)')
-    #formulas:
-    true_1 = 0
-    false_1 = 0
-    false_0 = 0
-    for c, m in zip(df_predict_1.cond, df_predict_1.moa):
-        if int(df_test[df_test.index == c][str(m)]) == 1:
-            true_1 += 1
-        else:
-            false_1 += 1
-    for c, m in zip(df_predict_0.cond, df_predict_0.moa):
-        if int(df_test[df_test.index == c][str(m)]) == 1:
-            false_0 += 1
-    precision = true_1/(true_1 + false_1)
-    recall = true_1/(true_1 + false_0)
-    print('true 1:', true_1, 'false 1:', false_1, 'false 0:', false_0)
-    print('precision:', precision)
-    print('recall:', recall)
-    
     #scores: logistic loss
     #we must create a dataframe with the probabilities following the same structure as the test dataframe
     print('\nCalculating logistic loss...')
@@ -165,7 +117,7 @@ def predictions_and_scores(fold, file_cond_test, file_parameters, K, L, T, n_con
     log_loss_score = np.mean(log_loss_arr)
     print('log loss:', log_loss_score)
     
-    return(probas, precision, recall, log_loss_score)
+    return(probas, log_loss_score)
 
 def predictions_and_scores_withCells(fold, file_cond_test, file_parameters, K, L, T, F, n_cond, 
                                      n_moa, n_gen, n_cell, runs):
@@ -183,7 +135,7 @@ def predictions_and_scores_withCells(fold, file_cond_test, file_parameters, K, L
     :param n_gen: integer, number of genes in the whole dataset
     :param n_cell: integer, number of cells in the whole dataset
     :param runs: integer, number of runs
-    :return (probas, precision, recall, log_loss_score)
+    :return (probas, log_loss_score)
     '''
     import pandas as pd
     #reading the list with the conditions for the test:
@@ -237,54 +189,6 @@ def predictions_and_scores_withCells(fold, file_cond_test, file_parameters, K, L
     df_test = pd.read_csv('/Users/belbordes/Desktop/MoA Project/Code_revision_Toñi/Gemma_1abril/5foldCV_data/F'+
                           str(fold)+'_test_dataframe.csv', index_col=0)
     
-    #scores: precision and recall (we must choose if they will be 0 or 1 depending on the probability)
-    #dataframe with the pairs (cond-moa) with a predicted 1
-    print('Calculating precision and recall...')
-    #we must know how many 1s there were in the training set:
-    ### Cond-MoA with 0s ### 
-    fh=open('/Users/belbordes/Desktop/MoA Project/Code_revision_Toñi/Gemma_1abril/5foldCV_data/F'+
-            str(fold)+'_cmoas0.csv','r')
-    igot=fh.readlines()
-    F1_cmoas0=[]
-    for line in igot:
-        about = line.strip().split(',')
-        F1_cmoas0.append((int(about[0]),int(about[1])))
-    fh.close()
-    ### Cond-MoA with 1s ###
-    fh=open('/Users/belbordes/Desktop/MoA Project/Code_revision_Toñi/Gemma_1abril/5foldCV_data/F'+
-            str(fold)+'_cmoas1.csv','r')
-    igot=fh.readlines()
-    F1_cmoas1=[]
-    for line in igot:
-        about = line.strip().split(',')
-        F1_cmoas1.append((int(about[0]),int(about[1])))
-    fh.close()
-    #percentage of 1s we want:
-    percentage = (len(F1_cmoas1)/(len(F1_cmoas0)+len(F1_cmoas1)))*100 #training set
-    print('There are', len(F1_cmoas1), '1s in the training set (', percentage, '%)')
-    probas_sorted = probas.sort_values(by=['avg_proba1_ctrl0'], ascending=False).reset_index()
-    df_predict_1 = probas_sorted[:int(round((percentage/100)*len(probas), 0))]
-    #dataframe with the pairs with a predicted 0
-    df_predict_0 = probas_sorted[int(round((percentage/100)*len(probas), 0)):]
-    print(int(round((percentage/100)*len(probas), 0)), 'cond-moa pairs of the test set should be 1 (aprox.)')
-    #formulas:
-    true_1 = 0
-    false_1 = 0
-    false_0 = 0
-    for c, m in zip(df_predict_1.cond, df_predict_1.moa):
-        if int(df_test[df_test.index == c][str(m)]) == 1:
-            true_1 += 1
-        else:
-            false_1 += 1
-    for c, m in zip(df_predict_0.cond, df_predict_0.moa):
-        if int(df_test[df_test.index == c][str(m)]) == 1:
-            false_0 += 1
-    precision = true_1/(true_1 + false_1)
-    recall = true_1/(true_1 + false_0)
-    print('true 1:', true_1, 'false 1:', false_1, 'false 0:', false_0)
-    print('precision:', precision)
-    print('recall:', recall)
-    
     #scores: logistic loss
     #we must create a dataframe with the probabilities following the same structure as the test dataframe
     print('\nCalculating logistic loss...')
@@ -303,5 +207,5 @@ def predictions_and_scores_withCells(fold, file_cond_test, file_parameters, K, L
     log_loss_score = np.mean(log_loss_arr)
     print('log loss:', log_loss_score)
     
-    return(probas, precision, recall, log_loss_score)
+    return(probas, log_loss_score)
 
